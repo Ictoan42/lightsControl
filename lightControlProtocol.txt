@@ -1,0 +1,79 @@
+----------------------------------------------------
+-- Lighting control system communication protocol --
+----------------------------------------------------
+
+Designed and described for the Python Socket library
+
+-- Initial connection
+1: Client connects to server on port 1337
+
+2: Server sends the client 2 bytes
+    These two bytes are decoded as a big endian unsigned integer
+        This integer represents the number of LEDs that the system contains
+
+3: Client sends the server 2 bytes
+    These bytes are decoded as a big endian unsigned integer
+        This integer represents the desired buffer size requested by the client, in bytes
+
+4: Server sends the client 2 bytes
+    These bytes are decoded as a big endian unsigned integer
+        This integer represents the buffer size set by the server, to confirm this value with the client
+
+-- Command messages
+1: Client sends N bytes to the server
+    The first 24 bytes are the Header
+        If no data is being sent through the data, it should be set to zeros
+
+    If applicable, the remaining bytes are decoded into the Write Mask as follows
+        First is a chain of bytes of length LED_COUNT / 8, rounded up
+            Each bit of these bytes represents whether the corresponding LED should be modified or ignored when writing the colour data to the strip
+
+    All of the remaining bytes are the Colour Section of the LEDs that will be set
+        The colour data will be written to the LEDS from 0->LED_COUNT, skipping LEDs that are set to be ignored in the Write Mask
+            As such, the colour data should be omitted for LEDs that are set as 0 in the Write Mask
+
+            Colour data is encoded as 4 bytes per LED, each encoding brightness from 0->255, in the order WRGB
+                For example, 0xFF000000 is pure white at max brightness
+
+-- Disconnecting
+    If the client sends a message in which the first bytes of the header are "DISCONNECT" then the server immediately ends the connection
+        The server carries out this check before any further parsing, so simply sending a message of b"DISCONNECT" is sufficient
+
+    If the server sends a message in which the first bytes of the header are "TIMEOUT" then the client immediately ends the connection.
+    
+-- Error codes
+If an error is encountered, the server will send a message to the client to inform them of such. These error code messages have no header, and only contain 1 byte to be decoded as an unsigned integer. The error codes correspond to the following cases:
+    1: Incorrectly formatted Header
+    2: Message is longer than expected
+    3: Message is shorter than expected
+    4: Internal server error
+
+
+--------------------------------
+-- Example of command message --
+--------------------------------
+
+This example is assumed to be in a system with an LED_COUNT of 8
+
+The client connects, and sends the following message:
+
+0x000000000000000000000000A6FF00000000FF00008000FF0000FFFF00
+
+The first 24 bytes are the Header and do not contain information for command messages, and as such are discarded. This leaves:
+
+0xA6FF00000000FF00008000FF0000FFFF00
+
+As LED_COUNT is 8, there is 1 byte of Write Mask data, which in this case is 0xA6. This decodes to binary 0b10100110, representing that the first, third, sixth and seventh LED should be set. This leaves the Colour Section, which is easier to represent as 4 seperate 32 bit chunks:
+
+0xFF000000
+0x00FF0000
+0x8000FF00
+0x00FFFF00
+
+The first chunk shows a value of 0xFF for the W channel, and 0x00 for the R, G and B channels. This represents setting the white channel of the LED to max brightness, and setting the other three to be off. As this is listed first, this colour data is applied to the first LED.
+
+The second chunk shows a value of 0xFF for the R channel, and 0x00 for the W, G and B channels. This sets the red channel on max brightness, and turns the others off. As this was listed second, this colour data is applied to the third LED.
+
+The third chunk contains colour data setting the white channel to half brightness, setting the green channel to full brightness, and setting the other two channels off. As this is listed third, it is applied to the sixth LED.
+
+The fourth chunk contains colour data setting the red and green channels to full brightness, and setting the other two off. As this was listed fourth, it is applied to the seventh LED.
