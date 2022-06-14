@@ -6,8 +6,8 @@ import math
 
 # server vars
 PORT = 1337
-SERVER = "192.168.1.233"
-ADDR = (SERVER, PORT)
+SERVER = None # will be defined later
+ADDR = None # will be defined later
 DISCONNECT_MESSAGE = b"DISCONNECT"
 KEEPALIVE_MESSAGE = b"KEEPALIVE"
 DEFAULT_BUFFER_SIZE = 128
@@ -21,6 +21,13 @@ LED_BRIGHTNESS = 255
 LED_INVERT = False
 LED_CHANNEL = 0
 LED_STRIP = ws.SK6812W_STRIP
+
+# get device local IP
+tempSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+tempSock.connect(("1.1.1.1", 80)) # doesn't need to be able to connect, just needs to think it can. can be any non-loopback IP
+SERVER = tempSock.getsockname()[0]
+print(f"Device IP is {SERVER}")
+ADDR = (SERVER, PORT)
 
 # server init
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
