@@ -61,10 +61,10 @@ class networkControlledStrip:
         time.sleep(0.5)
 
     def keepAlive(self):
-        # send a keepAlive message to the server every 30(ish) seconds
+        # send a keepAlive message to the server every 15(ish) seconds
         # this method is run in a seperate thread
         while True:
-            for i in range(0, 60):
+            for i in range(0, 30):
                 # check if thread has been told to stop every 0.5s so overall connection shutdown can be faster without a race condition
                 if self.__connectionTerminating:
                     break
