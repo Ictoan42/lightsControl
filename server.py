@@ -123,7 +123,6 @@ def handle_client(conn, addr): # to be run in a seperate thread for every connec
 
             # test if the message is a keepAlive
             if command.startswith(KEEPALIVE_MESSAGE):
-                print(f"Recieved keepAlive from {addr}")
                 lastMessageTime = time.time()
                 skipExec = True
 
@@ -132,7 +131,7 @@ def handle_client(conn, addr): # to be run in a seperate thread for every connec
                     conn.send(decodeAndApplyCommand(command).to_bytes(1, byteorder="big"))
                 except:
                     print(f"Failed to parse in connection to {addr}")
-                    conn.send((4).to_bytes(1, byteorder="big"))
+                    conn.send((4).to_bytes(1, byteorder="big")) # error codes, currently unused
 
         else:
             if time.time() - lastMessageTime >= 30:
