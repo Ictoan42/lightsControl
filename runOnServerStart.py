@@ -9,7 +9,7 @@ def startScript():
 
     lightsArr = [0]*strip.LED_COUNT
 
-    for i in range(len(lightsArr)):
+    for i in range(strip.LED_COUNT):
         lightsArr[i] = [0,0,0,0]
 
     for i in range(strip.LED_COUNT*2):
@@ -23,7 +23,7 @@ def startScript():
         lightsArr[i][3] = 127
 
         for j in lightsArr:
-            strip.setPixelColour(i, lightsArr[i][0], lightsArr[i][1], lightsArr[i][2], lightsArr[i][3])
+            strip.setPixelColour(i%2, lightsArr[i][0], lightsArr[i][1], lightsArr[i][2], lightsArr[i][3])
         
         strip.send()
         time.sleep(0.03)
