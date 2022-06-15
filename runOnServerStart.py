@@ -16,4 +16,6 @@ def startScript():
         time.sleep(0.03)
     
     strip.setAllPixels(0, 0, 0, 0)
+    strip.send()
+    time.sleep(0.1)
     strip.disconnect()
