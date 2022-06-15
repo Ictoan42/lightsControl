@@ -17,8 +17,9 @@ class networkControlledStrip:
         self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.__s.connect((ip, port))
-        except:
+        except Exception as e:
             print(f"Failed to connect to socket at {ip}:{port}")
+            print(e)
             return -1
         
         # listen for LED count message from the server
