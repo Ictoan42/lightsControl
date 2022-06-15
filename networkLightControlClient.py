@@ -54,7 +54,8 @@ class networkControlledStrip:
             self.__colour_data[i] = [0,0,0,0]
 
         # start keepAlive thread
-        self.__connectionTerminating = threading.Event()
+        self.__connectionTerminating1 = threading.Event()
+        self.__connectionTerminating2 = threading.Event()
         self.__keepAlive = threading.Thread(target=self.keepAlive)
         self.__keepAlive.start()
 
@@ -67,18 +68,20 @@ class networkControlledStrip:
         while True:
             for i in range(0, 60):
                 # check if thread has been told to stop every 0.5s so overall connection shutdown can be faster without a race condition
-                if self.__connectionTerminating.is_set():
+                if self.__connectionTerminating1.is_set():
                     break
                 time.sleep(0.25)
             self.__s.send(self.__KEEPALIVE_MSG)
+            if self.__connectionTerminating1.is_set(): break
+        self.__connectionTerminating2.set()
 
     def disconnect(self):
         # disconnect from the server
 
         # shut down keepAlive thread
-        self.__connectionTerminating.set()
+        self.__connectionTerminating1.set()
 
-        time.sleep(0.3)
+        self.__connectionTerminating2.wait()
 
         self.__s.send(self.__DISCONNECT_MESSAGE)
     
