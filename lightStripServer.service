@@ -1,0 +1,21 @@
+# systemd unit file for light strip server
+
+[Unit]
+
+Description=Light strip management server
+
+[Service]
+
+ExecStart=/usr/bin/python PATH_TO_SERVER.PY
+
+Environment=PYTHONUNBUFFERED=1
+
+Restart=on-failure
+
+Type=notify
+
+User=root
+
+[Install]
+
+WantedBy=default.target
