@@ -156,6 +156,7 @@ def start():
 def runStartupScript():
     time.sleep(0.2) # wait a moment for the server to finish starting
     startScript() # run init script
+    print("Start Script Finished")
 
 print("Server Starting")
 startup = threading.Thread(target=runStartupScript)
