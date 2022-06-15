@@ -4,7 +4,7 @@ import time
 # a simple wipe across the strip, this program is set by default to run when the server starts
 
 def startScript():
-    strip = networkControlledStrip("127.0.0.1")
+    strip = networkControlledStrip("localhost")
 
     lightsArr = [0]*strip.LED_COUNT
 
