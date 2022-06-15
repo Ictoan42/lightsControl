@@ -16,7 +16,7 @@ Environment=PYTHONUNBUFFERED=1
 
 Restart=on-failure
 
-Type=notify
+Type=simple
 
 User=root
 
