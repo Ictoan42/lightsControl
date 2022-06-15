@@ -3,6 +3,7 @@ from rpi_ws281x import PixelStrip, Color, ws
 import threading
 import time
 import math
+from runOnServerStart import startScript
 
 # server vars
 PORT = 1337
@@ -107,8 +108,11 @@ def handle_client(conn, addr): # to be run in a seperate thread for every connec
         try:
             command = conn.recv(bufferSize)
         except socket.timeout:
-            command = ""
+            command = "" # set command to be empty so the if statement skips and we just wait again
         except ConnectionResetError:
+            # I have absolutely no clue why but sometimes when I stop a client program it throws this error in the server
+            # so I'm just catching it and calling it "disconnecting ungracefully" because that sounds like I know what
+            # I'm doing
             print(f"Client {addr} has disconnected ungracefully")
             break
 
@@ -119,15 +123,15 @@ def handle_client(conn, addr): # to be run in a seperate thread for every connec
             # test if the message is a disconnect message
             if command.startswith(DISCONNECT_MESSAGE):
                 print(f"Client {addr} has disconnected gracefully")
-                break
+                break # exit completely, allowing function to end
 
             # test if the message is a keepAlive
             if command.startswith(KEEPALIVE_MESSAGE):
-                lastMessageTime = time.time()
-                skipExec = True
+                skipExec = True # skip the current exec and wait again for an actual command
 
             if not skipExec:
                 try:
+                    # sends the error codes in the function to the client, currently unused
                     conn.send(decodeAndApplyCommand(command).to_bytes(1, byteorder="big"))
                 except:
                     print(f"Failed to parse in connection to {addr}")
@@ -141,6 +145,7 @@ def handle_client(conn, addr): # to be run in a seperate thread for every connec
 
 
 def start():
+    hasStarted.set()
     server.listen(5)
     while True:
         conn, addr = server.accept()
@@ -149,5 +154,11 @@ def start():
         thread.start()
         print(f"{threading.activeCount() - 1} active connections")
 
+def runStartupScript():
+    hasStarted.wait() # wait for the server to finish starting
+    startScript() # run init script
+
 print("Server Starting")
+hasStarted = threading.Event()
+threading.Thread(target=runStartupScript) # run startup script in seperate thread that waits for the server to start
 start()
