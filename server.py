@@ -33,7 +33,7 @@ ADDR = (SERVER, PORT)
 # server init
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-server.bind(ADDR)
+server.bind("", PORT)
 
 # LED init
 strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
