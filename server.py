@@ -145,7 +145,6 @@ def handle_client(conn, addr): # to be run in a seperate thread for every connec
 
 
 def start():
-    hasStarted.set()
     server.listen(5)
     while True:
         conn, addr = server.accept()
@@ -155,10 +154,8 @@ def start():
         print(f"{threading.activeCount() - 1} active connections")
 
 def runStartupScript():
-    hasStarted.wait() # wait for the server to finish starting
+    time.sleep(0.2) # wait a moment for the server to finish starting
     startScript() # run init script
 
 print("Server Starting")
-hasStarted = threading.Event()
-threading.Thread(target=runStartupScript) # run startup script in seperate thread that waits for the server to start
 start()
