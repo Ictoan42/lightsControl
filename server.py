@@ -158,4 +158,6 @@ def runStartupScript():
     startScript() # run init script
 
 print("Server Starting")
+startup = threading.Thread(target=runStartupScript)
+startup.start()
 start()
