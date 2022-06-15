@@ -1,15 +1,16 @@
 from networkLightControlClient import networkControlledStrip
 import time
+import socket
 
 # a simple wipe across the strip, this program is set by default to run when the server starts
 
 def startScript():
-    strip = networkControlledStrip("localhost")
+    strip = networkControlledStrip(socket.gethostname())
 
     lightsArr = [0]*strip.LED_COUNT
 
-    for i in lightsArr:
-        i = [0,0,0,0]
+    for i in range(len(lightsArr)):
+        lightsArr[i] = [0,0,0,0]
 
     for i in range(strip.LED_COUNT*2):
         
