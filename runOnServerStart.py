@@ -1,4 +1,5 @@
 from networkLightControlClient import networkControlledStrip
+import time
 
 # a simple wipe across the strip, this program is set by default to run when the server starts
 
@@ -24,3 +25,4 @@ def startScript():
             strip.setPixelColour(i, lightsArr[i][0], lightsArr[i][1], lightsArr[i][2], lightsArr[i][3])
         
         strip.send()
+        time.sleep(0.03)
