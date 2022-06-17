@@ -4,6 +4,7 @@ import threading
 import time
 import math
 from runOnServerStart import startScript
+from errno import ENETUNREACH
 
 # server vars
 PORT = 1337
@@ -23,9 +24,24 @@ LED_INVERT = False
 LED_CHANNEL = 0
 LED_STRIP = ws.SK6812W_STRIP
 
-# get device local IP
+# LED init
+strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
+strip.begin()
+
+# attempt to get device local IP until successful
+# This will both give us the IP (if needed), and make the server wait until networking is up
 tempSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-tempSock.connect(("1.1.1.1", 80)) # doesn't need to be able to connect, just needs to think it can. can be any non-loopback IP
+while True:
+    try:
+        tempSock.connect(("1.1.1.1", 80)) # doesn't need to be able to connect, just needs to think it can. can be any non-loopback IP
+        break
+    except IOError as e:
+        if e.errno == ENETUNREACH:
+            time.sleep(0.5)
+        else:
+            # something else broke, reraise
+            raise
+
 SERVER = tempSock.getsockname()[0]
 print(f"Device IP is {SERVER}")
 ADDR = (SERVER, PORT)
@@ -33,11 +49,8 @@ ADDR = (SERVER, PORT)
 # server init
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-server.bind(("", PORT))
+server.bind(("", PORT)) # bind to anything so it can be accessed from network or localhost
 
-# LED init
-strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
-strip.begin()
 
 def decodeAndApplyCommand(command):
     # command must be a bytes object
@@ -144,7 +157,7 @@ def handle_client(conn, addr): # to be run in a seperate thread for every connec
             time.sleep(0.001)
 
 
-def start():
+def runServer():
     server.listen(5)
     while True:
         conn, addr = server.accept()
@@ -161,4 +174,4 @@ def runStartupScript():
 print("Server Starting")
 startup = threading.Thread(target=runStartupScript)
 startup.start()
-start()
+runServer()
