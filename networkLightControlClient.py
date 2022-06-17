@@ -2,6 +2,7 @@ import socket
 import math
 import time
 import threading
+from errno import ECONNRESET
 
 
 class networkControlledStrip:
@@ -83,8 +84,15 @@ class networkControlledStrip:
 
         self.__connectionTerminating2.wait()
 
-        self.__s.send(self.__DISCONNECT_MESSAGE)
-    
+        try:
+            self.__s.send(self.__DISCONNECT_MESSAGE)
+        except IOError as e:
+            if e.errno == ECONNRESET:
+                print("Connection terminated server side")
+            else:
+                raise
+
+
     def setAllPixels(self, w:int, r:int, g:int, b:int):
         # set every pixel value to the set colour
 
