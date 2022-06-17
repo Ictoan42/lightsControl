@@ -176,6 +176,8 @@ class networkControlledStrip:
         # send to socket
         try:
             self.__s.send(messageToSend)
+        except TimeoutError:
+            return -1
         except IOError as e:
             if e.errno == ECONNRESET or e.errno == EPIPE:
                 return -1
