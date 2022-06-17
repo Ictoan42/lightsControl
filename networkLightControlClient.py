@@ -173,8 +173,11 @@ class networkControlledStrip:
         # send to socket
         try:
             self.__s.send(messageToSend)
-        except:
-            print("Failed to send message to socket!")
-            return -1
+        except IOError as e:
+            if e.errno == ECONNRESET or e.errno == EPIPE:
+                return -1
+            else:
+                raise
+
         
         return 0
