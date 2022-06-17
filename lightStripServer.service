@@ -8,6 +8,8 @@ Description=Light strip management server
 
 ExecStart=/usr/bin/python PATH_TO_SERVER.PY
 
+KillSignal=SIGINT
+
 Environment=PYTHONUNBUFFERED=1
 
 Restart=on-failure

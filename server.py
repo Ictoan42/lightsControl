@@ -45,6 +45,7 @@ while True:
         tempSock.connect(("1.1.1.1", 80)) # doesn't need to be able to connect, just needs to think it can. can be any non-loopback IP
         strip.setPixelColor(indicatorLedID, Color(0, 255, 0))
         strip.show()
+        time.sleep(0.5)
         break
     except IOError as e:
         if e.errno == ENETUNREACH:
@@ -134,6 +135,14 @@ def handle_client(conn, addr): # to be run in a seperate thread for every connec
 
     # listen for client commands
     while True:
+        # end connection if server is shutting down
+        if shutdownEvent.is_set():
+            # tell client to disconnect
+            conn.send(b"S_SHUTDOWN")
+            print(f"Connection to {addr} has been ended on thread {threading.get_ident()}")
+            # exit thread
+            break
+
         skipExec = False
         conn.settimeout(15)
         try:
@@ -192,4 +201,23 @@ def runStartupScript():
 print("Server Starting")
 startup = threading.Thread(target=runStartupScript)
 startup.start()
-runServer()
+
+shutdownEvent = threading.Event()
+
+try:
+    runServer()
+except KeyboardInterrupt:
+    print("Server is shutting down")
+    
+    for i in range(LED_COUNT): # clear all pixels
+        strip.setPixelColor(i, 0)
+    strip.show()
+
+    shutdownEvent.set()
+    
+    # wait for all threads to stop
+    while threading.active_count() > 1:
+        time.sleep(0.01)
+    
+    print("Server has shut down")
+

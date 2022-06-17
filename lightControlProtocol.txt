@@ -41,6 +41,8 @@ Designed and described for the Python Socket library
 
     If the server sends a message in which the first bytes of the header are "TIMEOUT" then the client immediately ends the connection.
     
+    If the server sends a message in which the first bytes of the header are "S_SHUTDOWN" then the client immediately ends the connection.
+
 -- Error codes
 If an error is encountered, the server will send a message to the client to inform them of such. These error code messages have no header, and only contain 1 byte to be decoded as an unsigned integer. The error codes correspond to the following cases:
     1: Incorrectly formatted Header
