@@ -1,4 +1,5 @@
 import socket
+from numpy import indices
 from rpi_ws281x import PixelStrip, Color, ws
 import threading
 import time
@@ -28,18 +29,35 @@ LED_STRIP = ws.SK6812W_STRIP
 strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
 strip.begin()
 
+# simple indicator LED to show that the server is starting
+indicatorLedID = 0
+strip.setPixelColor(indicatorLedID, Color(0, 0, 255))
+strip.show()
+time.sleep(0.2)
+strip.setPixelColor(indicatorLedID, 0)
+strip.show()
+
 # attempt to get device local IP until successful
 # This will both give us the IP (if needed), and make the server wait until networking is up
 tempSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 while True:
     try:
         tempSock.connect(("1.1.1.1", 80)) # doesn't need to be able to connect, just needs to think it can. can be any non-loopback IP
+        strip.setPixelColor(indicatorLedID, Color(0, 255, 0))
+        strip.show()
         break
     except IOError as e:
         if e.errno == ENETUNREACH:
-            time.sleep(0.5)
+            strip.setPixelColor(indicatorLedID, Color(0, 0, 255))
+            strip.show()
+            time.sleep(0.4)
+            strip.setPixelColor(indicatorLedID, 0)
+            strip.show()
+            time.sleep(0.1)
         else:
-            # something else broke, reraise
+            # something else broke
+            strip.setPixelColor(indicatorLedID, Color(255, 0, 0))
+            strip.show()
             raise
 
 SERVER = tempSock.getsockname()[0]
