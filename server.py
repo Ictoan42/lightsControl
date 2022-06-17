@@ -211,6 +211,7 @@ except KeyboardInterrupt:
     
     for i in range(LED_COUNT): # clear all pixels
         strip.setPixelColor(i, 0)
+    strip.setPixelColor(indicatorLedID, Color(0, 0, 255))
     strip.show()
 
     shutdownEvent.set()
@@ -219,5 +220,11 @@ except KeyboardInterrupt:
     while threading.active_count() > 1:
         time.sleep(0.01)
     
+    strip.setPixelColor(indicatorLedID, Color(0, 255, 0))
+    strip.show()
+    time.sleep(0.5)
+    strip.setPixelColor(indicatorLedID, 0)
+    strip.show()
+
     print("Server has shut down")
 
