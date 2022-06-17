@@ -2,7 +2,7 @@ import socket
 import math
 import time
 import threading
-from errno import ECONNRESET
+from errno import ECONNRESET, ENETRESET, EPIPE
 
 
 class networkControlledStrip:
@@ -72,7 +72,16 @@ class networkControlledStrip:
                 if self.__connectionTerminating1.is_set():
                     break
                 time.sleep(0.25)
-            self.__s.send(self.__KEEPALIVE_MSG)
+            try:
+                self.__s.send(self.__KEEPALIVE_MSG)
+            except IOError as e:
+                if e.errno == EPIPE:
+                    print("Keepalive failed: Broken Pipe")
+                elif e.errno == ECONNRESET:
+                    print("Keepalive failed: Connection Reset")
+                
+                else:
+                    raise
             if self.__connectionTerminating1.is_set(): break
         self.__connectionTerminating2.set()
 
@@ -88,7 +97,9 @@ class networkControlledStrip:
             self.__s.send(self.__DISCONNECT_MESSAGE)
         except IOError as e:
             if e.errno == ECONNRESET:
-                print("Connection terminated server side")
+                print("Connection terminated server side: Connection Reset")
+            elif e.errno == EPIPE:
+                print("Connection terminated server side: Broken Pipe")
             else:
                 raise
 
