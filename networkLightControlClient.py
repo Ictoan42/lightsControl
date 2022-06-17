@@ -16,12 +16,13 @@ class networkControlledStrip:
 
         # init socket
         self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__s.settimeout(5)
         try:
             self.__s.connect((ip, port))
         except Exception as e:
             print(f"Failed to connect to socket at {ip}:{port}")
             print(e)
-            return -1
+            raise
         
         # listen for LED count message from the server
         knowLEDCount = False
@@ -79,7 +80,9 @@ class networkControlledStrip:
                     print("Keepalive failed: Broken Pipe")
                 elif e.errno == ECONNRESET:
                     print("Keepalive failed: Connection Reset")
-                
+                elif TimeoutError:
+                    print("Keepalive failed: Time Out")
+
                 else:
                     raise
             if self.__connectionTerminating1.is_set(): break
