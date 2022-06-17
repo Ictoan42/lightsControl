@@ -120,7 +120,7 @@ Disconnects from the server. If the disconnect message fails to get to the serve
 
 - If the message fails to reach the server for a reason other than Connection Reset or Broken Pipe.
 
-### Property `LED_COUNT`
+#### Property `LED_COUNT`
 
 A property of the `networkControlledStrip` object that represents the number of LEDs in the strip.
 
