@@ -4,11 +4,7 @@
 
 Description=Light strip management server
 
-After=network-online.target
-
 [Service]
-
-ExecStartPre=/bin/sleep 10
 
 ExecStart=/usr/bin/python PATH_TO_SERVER.PY
 
