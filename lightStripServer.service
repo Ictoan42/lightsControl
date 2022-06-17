@@ -10,6 +10,8 @@ ExecStart=/usr/bin/python PATH_TO_SERVER.PY
 
 KillSignal=SIGINT
 
+TimeoutStopSec=5
+
 Environment=PYTHONUNBUFFERED=1
 
 Restart=on-failure
