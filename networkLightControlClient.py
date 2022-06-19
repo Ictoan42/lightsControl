@@ -139,8 +139,6 @@ class networkControlledStrip:
 
         self.__colour_data[LEDID] = [w, r, g, b]
 
-        return 0
-
     def send(self):
         # send accumulated changes over the network as a command
         
