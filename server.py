@@ -71,11 +71,12 @@ server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 server.bind(("", PORT)) # bind to anything so it can be accessed from network or localhost
 
 
-def decodeAndApplyCommand(command):
+def decodeAndApplyCommand(command, verbose=False):
     # command must be a bytes object
 
     # check header integrity
     if int(command[:24].hex(), 16):
+        if verbose: print("Malformed Header")
         return 1 # error code 1 (incorrect header)
 
     # as this function does not handle headers, discard it
@@ -93,13 +94,18 @@ def decodeAndApplyCommand(command):
         numOfLeadingZerosNeeded = LED_COUNT - len(writeMaskStr)
         writeMaskStr = ("0" * numOfLeadingZerosNeeded) + writeMaskStr
 
+    if verbose: print(f"writeMaskStr is {writeMaskStr}")
+
     # find expected length of message
     numOfExpectedColourDatapoints = writeMaskStr.count("1")
+    if verbose: print(f"Expecting a length of {numOfExpectedColourDatapoints}")
 
     # check length of message
     if len(command)/4 < numOfExpectedColourDatapoints:
+        if verbose: print("Message too short")
         return 3 # error code 3 (message is too short)
     elif len(command)/4 > numOfExpectedColourDatapoints:
+        if verbose: print("Message is too long")
         return 2 # error code 2 (message is too long)
 
     # loop over the remaining bytes, extracting in groups of 4 and applying
@@ -107,11 +113,14 @@ def decodeAndApplyCommand(command):
     for i in range(0, LED_COUNT):
         if int(writeMaskStr[i]):
             #print(command[4*colourDataReadPoint:4*(colourDataReadPoint+1)].hex())
+            if verbose: print(f"Setting pixel {i} to colour {hex(int(command[4*colourDataReadPoint:4*(colourDataReadPoint+1)].hex(), 16))}")
             strip.setPixelColor(i, int(command[4*colourDataReadPoint:4*(colourDataReadPoint+1)].hex(), 16))
             colourDataReadPoint += 1
 
     # apply changes to strip
     strip.show()
+
+    if verbose: print("Command execution succeeded")
 
     # return 0 for success I guess?
     time.sleep(0.001)
