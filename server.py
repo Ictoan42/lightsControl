@@ -87,6 +87,12 @@ def decodeAndApplyCommand(command):
     command = command[writeMaskByteCount:] # remove writeMask from command
     writeMaskStr = bin(int(writeMaskBytes.hex(), 16)).lstrip("0b")
 
+    # check if writemask needs fixing
+    if len(writeMaskStr) < LED_COUNT:
+        # bin() removed leading zeros, readd them
+        numOfLeadingZerosNeeded = LED_COUNT - len(writeMaskStr)
+        writeMaskStr = ("0" * numOfLeadingZerosNeeded) + writeMaskStr
+
     # find expected length of message
     numOfExpectedColourDatapoints = writeMaskStr.count("1")
 
