@@ -49,11 +49,11 @@ Initalise a connection to the server by initialising a `networkControlledStrip` 
 
 **Returns:**
 
-- Nothing
+- `networkControlledStrip` object
 
 **Throws:**
 
-- If a connection to the server cannot be established, the network exception is thrown.
+- If a connection to the server cannot be established, the respective network exception is thrown.
 
 #### Method `setPixelColour(LED_ID, w, r, g, b)`
 
@@ -124,7 +124,11 @@ Disconnects from the server. If the disconnect message fails to get to the serve
 
 A property of the `networkControlledStrip` object that represents the number of LEDs in the strip.
 
-Example, set every other LED to red:
+---
+### Examples
+
+
+**Set every other LED to red:**
 
     for i in range(strip.LED_COUNT):
         if i%2 == 0:
